@@ -59,7 +59,7 @@ class DBALEventStore implements EventStoreInterface
     public function load($id)
     {
         $statement = $this->prepareLoadStatement();
-        $statement->bindValue('uuid', (string) $id, 'guid');
+        $statement->bindValue('uuid', (string) $id, 'string');
         $statement->execute();
 
         $events = array();
@@ -134,7 +134,7 @@ class DBALEventStore implements EventStoreInterface
         $table = $schema->createTable($this->tableName);
 
         $table->addColumn('id', 'integer', array('autoincrement' => true));
-        $table->addColumn('uuid', 'guid', array('length' => 36));
+        $table->addColumn('uuid', 'string', array('length' => 36));
         $table->addColumn('playhead', 'integer', array('unsigned' => true));
         $table->addColumn('payload', 'text');
         $table->addColumn('metadata', 'text');
