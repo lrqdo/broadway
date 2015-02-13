@@ -28,7 +28,9 @@ class RegisterBusSubscribersCompilerPassTest extends TestCase
 
     public function setUp()
     {
-        $this->builder    = $this->getMock('Symfony\Component\DependencyInjection\ContainerBuilder');
+        $this->builder    = $this->getMockBuilder('Symfony\Component\DependencyInjection\ContainerBuilder')
+            ->setMethods(array('getParameterBag', 'getDefinition', 'hasDefinition', 'findDefinition', 'findTaggedServiceIds'))
+            ->getMock();
         $this->commandBus = $this->getMock('Symfony\Component\DependencyInjection\Definition');
     }
 
@@ -58,7 +60,7 @@ class RegisterBusSubscribersCompilerPassTest extends TestCase
     public function it_subscribes_command_handler()
     {
         $commandHandlerId = 'my_command_handler';
-        $services = array(
+        $services         = array(
             $commandHandlerId => array(),
         );
 

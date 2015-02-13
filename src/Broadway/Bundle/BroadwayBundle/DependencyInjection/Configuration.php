@@ -11,8 +11,10 @@
 
 namespace Broadway\Bundle\BroadwayBundle\DependencyInjection;
 
+use Doctrine\DBAL\Version;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
+use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 
 /**
  * Configuration definition.
@@ -37,12 +39,46 @@ class Configuration implements ConfigurationInterface
                         ->end()
                     ->end()
                 ->end()
+                ->arrayNode('event_store')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->arrayNode('dbal')
+                            ->addDefaultsIfNotSet()
+                            ->children()
+                                ->scalarNode('table')
+                                    ->defaultValue('events')
+                                ->end()
+                                ->booleanNode('use_binary')
+                                    ->defaultFalse()
+                                    ->validate()
+                                    ->ifTrue()
+                                        ->then(function ($v) {
+                                            if (Version::compare('2.5.0') >= 0) {
+                                                throw new InvalidConfigurationException(
+                                                    'The Binary storage is only available with Doctrine DBAL >= 2.5.0'
+                                                );
+                                            }
+
+                                            return $v;
+                                        })
+                                    ->end()
+                                ->end()
+                            ->end()
+                        ->end()
+                    ->end()
+                ->end()
                 ->arrayNode('saga')
                     ->addDefaultsIfNotSet()
                     ->children()
                         ->enumNode('repository')
                             ->values(array('in_memory', 'mongodb'))
                             ->defaultValue('mongodb')
+                        ->end()
+                        ->arrayNode('mongodb')
+                            ->addDefaultsIfNotSet()
+                            ->children()
+                                ->scalarNode('storage_suffix')->defaultNull()->end()
+                            ->end()
                         ->end()
                     ->end()
                 ->end()

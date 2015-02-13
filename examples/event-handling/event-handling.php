@@ -5,7 +5,7 @@ require_once __DIR__ . '/../bootstrap.php';
 // An event listener implement the handle method
 class MyEventListener implements Broadway\EventHandling\EventListenerInterface
 {
-    public function handle(Broadway\Domain\DomainMessageInterface $domainMessage)
+    public function handle(Broadway\Domain\DomainMessage $domainMessage)
     {
         echo "Got a domain message, yay!\n";
     }
@@ -18,7 +18,7 @@ $eventBus->subscribe($eventListener);
 
 // Create a domain event stream to publish
 $metadata          = new Broadway\Domain\Metadata(array('source' => 'example'));
-$domainMessage     = Broadway\Domain\DomainMessage::recordNow(42, 1, $metadata, new stdClass);
+$domainMessage     = Broadway\Domain\DomainMessage::recordNow(42, 1, $metadata, new stdClass());
 $domainEventStream = new Broadway\Domain\DomainEventStream(array($domainMessage));
 
 // Publish the message, and get output from the event handler \o/

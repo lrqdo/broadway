@@ -161,11 +161,18 @@ class InvitedEvent extends Invitationevent
 }
 
 // The meaning from these commands and events can be found in the name :)
-class AcceptCommand extends InvitationCommand { }
-class AcceptedEvent extends InvitationEvent { }
-class DeclineCommand extends InvitationCommand { }
-class DeclinedEvent extends InvitationEvent { }
-
+class AcceptCommand extends InvitationCommand
+{
+}
+class AcceptedEvent extends InvitationEvent
+{
+}
+class DeclineCommand extends InvitationCommand
+{
+}
+class DeclinedEvent extends InvitationEvent
+{
+}
 
 /*
  * A command handler will be registered with the command bus and handle the
@@ -191,7 +198,7 @@ class InvitationCommandHandler extends Broadway\CommandHandling\CommandHandler
     {
         $invitation = Invitation::invite($command->invitationId, $command->name);
 
-        $this->repository->add($invitation);
+        $this->repository->save($invitation);
     }
 
     /**
@@ -204,7 +211,7 @@ class InvitationCommandHandler extends Broadway\CommandHandling\CommandHandler
 
         $invitation->accept();
 
-        $this->repository->add($invitation);
+        $this->repository->save($invitation);
     }
 
     protected function handleDeclineCommand(DeclineCommand $command)
@@ -213,6 +220,6 @@ class InvitationCommandHandler extends Broadway\CommandHandling\CommandHandler
 
         $invitation->decline();
 
-        $this->repository->add($invitation);
+        $this->repository->save($invitation);
     }
 }

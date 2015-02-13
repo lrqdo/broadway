@@ -17,6 +17,7 @@ use Broadway\Domain\DomainMessage;
 use Broadway\Domain\Metadata;
 use Broadway\Serializer\SerializableInterface;
 use Broadway\TestCase;
+use Rhumsaa\Uuid\Uuid;
 
 abstract class EventStoreTest extends TestCase
 {
@@ -46,7 +47,7 @@ abstract class EventStoreTest extends TestCase
      */
     public function it_appends_to_an_already_existing_stream($id)
     {
-        $dateTime = DateTime::fromString('2014-03-12T14:17:19.176169+00:00');
+        $dateTime          = DateTime::fromString('2014-03-12T14:17:19.176169+00:00');
         $domainEventStream = new DomainEventStream(array(
             $this->createDomainMessage($id, 0, $dateTime),
             $this->createDomainMessage($id, 1, $dateTime),
@@ -121,22 +122,27 @@ abstract class EventStoreTest extends TestCase
 
     public function idDataProvider()
     {
+        $uuid = Uuid::uuid4();
+
         return array(
-            array(
+            'Simple String' => array(
                 'Yolntbyaac', //You only live nine times because you are a cat
             ),
-            array(
+            'Identitiy' => array(
                 new StringIdentity(
                     'Yolntbyaac' //You only live nine times because you are a cat
-                )
+                ),
             ),
-            array(
+            'Integer' => array(
                 42, // test an int
+            ),
+            'UUID String' => array(
+                $uuid->toString(), // test UUID
             ),
         );
     }
 
-    private function createDomainMessage($id, $playhead, $recordedOn = null)
+    protected function createDomainMessage($id, $playhead, $recordedOn = null)
     {
         return new DomainMessage($id, $playhead, new MetaData(array()), new Event(), $recordedOn ? $recordedOn : DateTime::now());
     }

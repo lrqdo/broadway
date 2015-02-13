@@ -27,7 +27,7 @@ class BroadwayExtension extends Extension
      */
     public function load(array $configs, ContainerBuilder $container)
     {
-        $loader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
+        $loader = new XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
 
         $configuration = $this->getConfiguration($configs, $container);
         $config        = $this->processConfiguration($configuration, $configs);
@@ -39,6 +39,7 @@ class BroadwayExtension extends Extension
         $this->loadSagaStateRepository($config['saga'], $container, $loader);
         $this->loadReadModelRepository($config['read_model'], $container, $loader);
         $this->loadCommandBus($config['command_handling'], $container);
+        $this->loadEventStore($config['event_store'], $container);
     }
 
     private function loadCommandBus(array $config, ContainerBuilder $container)
@@ -68,6 +69,8 @@ class BroadwayExtension extends Extension
                     'broadway.saga.state.repository',
                     'broadway.saga.state.mongodb_repository'
                 );
+
+                $container->setParameter('broadway.saga.mongodb.storage_suffix', $config['mongodb']['storage_suffix']);
                 break;
             case 'in_memory':
                 $loader->load('saga/in_memory.xml');
@@ -91,6 +94,19 @@ class BroadwayExtension extends Extension
                 $this->configInMemory($container);
                 break;
         }
+    }
+
+    private function loadEventStore(array $config, ContainerBuilder $container)
+    {
+        $container->setParameter(
+            'broadway.event_store.dbal.table',
+            $config['dbal']['table']
+        );
+
+        $container->setParameter(
+            'broadway.event_store.dbal.use_binary',
+            $config['dbal']['use_binary']
+        );
     }
 
     private function configElasticsearch(array $config, ContainerBuilder $container)

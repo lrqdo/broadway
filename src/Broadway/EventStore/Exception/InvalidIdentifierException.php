@@ -9,17 +9,13 @@
  * file that was distributed with this source code.
  */
 
-namespace Broadway\EventHandling;
+namespace Broadway\EventStore\Exception;
 
-use Broadway\Domain\DomainMessage;
+use InvalidArgumentException;
 
 /**
- * Handles dispatched events.
+ * Class InvalidIdentifierException
  */
-interface EventListenerInterface
+class InvalidIdentifierException extends \InvalidArgumentException
 {
-    /**
-     * @param DomainMessage $domainMessage
-     */
-    public function handle(DomainMessage $domainMessage);
 }

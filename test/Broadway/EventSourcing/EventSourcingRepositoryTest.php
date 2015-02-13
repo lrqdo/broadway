@@ -33,7 +33,7 @@ class EventSourcingRepositoryTest extends AbstractEventSourcingRepositoryTest
 
     /**
      * @test
-     * @expectedException Assert\InvalidArgumentException
+     * @expectedException \Assert\InvalidArgumentException
      */
     public function it_throws_an_exception_when_instantiated_with_a_class_that_is_not_an_EventSourcedAggregateRoot()
     {
@@ -48,16 +48,16 @@ class EventSourcingRepositoryTest extends AbstractEventSourcingRepositoryTest
         // make sure events exist in the event store
         $id = 'y0l0';
         $this->eventStore->append($id, new DomainEventStream(array(
-            DomainMessage::recordNow(42, 0, new Metadata(array()), new DidEvent)
+            DomainMessage::recordNow(42, 0, new Metadata(array()), new DidEvent())
         )));
 
         $repository = $this->repositoryWithStaticAggregateFactory();
-        $aggregate = $repository->load('y0l0');
+        $aggregate  = $repository->load('y0l0');
         $this->assertTrue($aggregate->constructorWasCalled);
         $this->assertEquals($aggregate->instantiatedThrough, 'instantiateForReconstitution');
 
         $repository = $this->repositoryWithStaticAggregateFactory('justAnotherInstantiation');
-        $aggregate = $repository->load('y0l0');
+        $aggregate  = $repository->load('y0l0');
         $this->assertTrue($aggregate->constructorWasCalled);
         $this->assertEquals($aggregate->instantiatedThrough, 'justAnotherInstantiation');
     }
@@ -71,7 +71,7 @@ class EventSourcingRepositoryTest extends AbstractEventSourcingRepositoryTest
         // make sure events exist in the event store
         $id = 'y0l0';
         $this->eventStore->append($id, new DomainEventStream(array(
-            DomainMessage::recordNow(42, 0, new Metadata(array()), new DidEvent)
+            DomainMessage::recordNow(42, 0, new Metadata(array()), new DidEvent())
         )));
 
         $repository = $this->repositoryWithStaticAggregateFactory('someUnknownStaticmethod');
@@ -111,7 +111,6 @@ class TestEventSourcedAggregate extends EventSourcedAggregateRoot
     }
 }
 
-
 class TestEventSourcedAggregateWithStaticConstructor extends EventSourcedAggregateRoot
 {
     public $constructorWasCalled = false;
@@ -120,7 +119,7 @@ class TestEventSourcedAggregateWithStaticConstructor extends EventSourcedAggrega
     private function __construct($instantiatedThrough)
     {
         $this->constructorWasCalled = true;
-        $this->instantiatedThrough = $instantiatedThrough;
+        $this->instantiatedThrough  = $instantiatedThrough;
     }
 
     public function getAggregateRootId()

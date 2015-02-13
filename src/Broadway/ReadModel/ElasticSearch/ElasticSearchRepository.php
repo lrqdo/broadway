@@ -48,7 +48,7 @@ class ElasticSearchRepository implements RepositoryInterface
     }
 
     /**
-     * {@inhericDoc}
+     * {@inheritDoc}
      */
     public function save(ReadModelInterface $data)
     {
@@ -66,7 +66,7 @@ class ElasticSearchRepository implements RepositoryInterface
     }
 
     /**
-     * {@inhericDoc}
+     * {@inheritDoc}
      */
     public function find($id)
     {
@@ -86,7 +86,7 @@ class ElasticSearchRepository implements RepositoryInterface
     }
 
     /**
-     * {@inhericDoc}
+     * {@inheritDoc}
      */
     public function findBy(array $fields)
     {
@@ -234,7 +234,9 @@ class ElasticSearchRepository implements RepositoryInterface
             $indexParams['body'] = array(
                 'mappings' => array(
                     $class => array(
-                        '_source' => array('enabled' => true),
+                        '_source'    => array(
+                            'enabled' => true
+                        ),
                         'properties' => $this->createNotAnalyzedFieldsMapping($this->notAnalyzedFields),
                     )
                 )
@@ -243,9 +245,9 @@ class ElasticSearchRepository implements RepositoryInterface
 
         $this->client->indices()->create($indexParams);
         $response = $this->client->cluster()->health(array(
-            'index' => $this->index,
+            'index'           => $this->index,
             'wait_for_status' => 'yellow',
-            'timeout' => '5s',
+            'timeout'         => '5s',
         ));
 
         return isset($response['status']) && $response['status'] !== 'red';
@@ -259,16 +261,16 @@ class ElasticSearchRepository implements RepositoryInterface
     public function deleteIndex()
     {
         $indexParams = array(
-            'index' => $this->index,
+            'index'   => $this->index,
             'timeout' => '5s',
         );
 
         $this->client->indices()->delete($indexParams);
 
         $response = $this->client->cluster()->health(array(
-            'index' => $this->index,
+            'index'           => $this->index,
             'wait_for_status' => 'yellow',
-            'timeout' => '5s',
+            'timeout'         => '5s',
         ));
 
         return isset($response['status']) && $response['status'] !== 'red';
