@@ -41,7 +41,7 @@ class DBALEventStore implements EventStoreInterface
 
     private $tableName;
 
-    private $uuidType;
+    private $useBinary;
 
     /**
      * @param string $tableName
@@ -51,15 +51,15 @@ class DBALEventStore implements EventStoreInterface
         SerializerInterface $payloadSerializer,
         SerializerInterface $metadataSerializer,
         $tableName,
-        $uuidType
+        $useBinary = false
     ) {
         $this->connection         = $connection;
         $this->payloadSerializer  = $payloadSerializer;
         $this->metadataSerializer = $metadataSerializer;
         $this->tableName          = $tableName;
-        $this->uuidType           = $uuidType;
+        $this->useBinary          = (bool) $useBinary;
 
-        if ($this->uuidType === 'binary' && Version::compare('2.5.0') >= 0) {
+        if ($this->useBinary && Version::compare('2.5.0') >= 0) {
             throw new \InvalidArgumentException(
                 'The Binary storage is only available with Doctrine DBAL >= 2.5.0'
             );
@@ -77,7 +77,7 @@ class DBALEventStore implements EventStoreInterface
 
         $events = array();
         while ($row = $statement->fetch()) {
-            if ($this->uuidType === 'binary') {
+            if ($this->useBinary) {
                 $row['uuid'] = $this->convertStorageValueToIdentifier($row['uuid']);
             }
             $events[] = $this->deserializeEvent($row);
@@ -147,36 +147,25 @@ class DBALEventStore implements EventStoreInterface
     {
         $schema = new Schema();
 
-        $uuidColumnDefinitions = array(
-            'guid' => array(
-                'type'   => 'guid',
-                'params' => array(
-                    'length' => 36,
-                ),
+        $uuidColumnDefinition = array(
+            'type'   => 'guid',
+            'params' => array(
+                'length' => 36,
             ),
-            'binary' => array(
-                'type'   => 'binary',
-                'params' => array(
-                    'length' => 16,
-                    'fixed'  => true,
-                )
-            ),
-            'string' => array(
-                'type'   => 'string',
-                'params' => array(
-                    'length' => 36,
-                )
-            )
         );
+
+        if ($this->useBinary) {
+            $uuidColumnDefinition['type']   = 'binary';
+            $uuidColumnDefinition['params'] = array(
+                'length' => 16,
+                'fixed'  => true,
+            );
+        }
 
         $table = $schema->createTable($this->tableName);
 
         $table->addColumn('id', 'integer', array('autoincrement' => true));
-        $table->addColumn(
-            'uuid',
-            $uuidColumnDefinitions[$this->uuidType]['type'],
-            $uuidColumnDefinitions[$this->uuidType]['params']
-        );
+        $table->addColumn('uuid', $uuidColumnDefinition['type'], $uuidColumnDefinition['params']);
         $table->addColumn('playhead', 'integer', array('unsigned' => true));
         $table->addColumn('payload', 'text');
         $table->addColumn('metadata', 'text');
@@ -215,7 +204,7 @@ class DBALEventStore implements EventStoreInterface
 
     private function convertIdentifierToStorageValue($id)
     {
-        if ($this->uuidType === 'binary') {
+        if ($this->useBinary) {
             try {
                 return Uuid::fromString($id)->getBytes();
             } catch (\Exception $e) {
@@ -230,7 +219,7 @@ class DBALEventStore implements EventStoreInterface
 
     private function convertStorageValueToIdentifier($id)
     {
-        if ($this->uuidType === 'binary') {
+        if ($this->useBinary) {
             try {
                 return Uuid::fromBytes($id)->toString();
             } catch (\Exception $e) {
