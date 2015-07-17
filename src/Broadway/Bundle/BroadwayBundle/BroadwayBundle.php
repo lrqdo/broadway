@@ -13,6 +13,7 @@ namespace Broadway\Bundle\BroadwayBundle;
 
 use Broadway\Bundle\BroadwayBundle\Command\SchemaEventStoreCreateCommand;
 use Broadway\Bundle\BroadwayBundle\Command\SchemaEventStoreDropCommand;
+use Broadway\Bundle\BroadwayBundle\DependencyInjection\DefineDBALEventStoreConnectionCompilerPass;
 use Broadway\Bundle\BroadwayBundle\DependencyInjection\RegisterBusSubscribersCompilerPass;
 use Broadway\Bundle\BroadwayBundle\DependencyInjection\RegisterEventListenerCompilerPass;
 use Broadway\Bundle\BroadwayBundle\DependencyInjection\RegisterMetadataEnricherSubscriberPass;

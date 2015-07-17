@@ -69,12 +69,40 @@ class BroadwayExtensionTest extends ExtensionTestCase
     /**
      * @test
      */
-    public function it_defaults_to_null_when_no_storage_suffix_is_configured_for_saga_storage()
+    public function it_defaults_to_empty_string_when_no_storage_suffix_is_configured_for_saga_storage()
     {
         $this->load($this->extension, array());
 
         $this->assertTrue($this->container->hasParameter('broadway.saga.mongodb.storage_suffix'));
-        $this->assertNull($this->container->getParameter('broadway.saga.mongodb.storage_suffix'));
+        $this->assertEquals('', $this->container->getParameter('broadway.saga.mongodb.storage_suffix'));
+    }
+
+    /**
+     * @test
+     */
+    public function it_uses_configured_connection_details_when_using_mongo_for_saga_repositories()
+    {
+        $dsn = 'mongodb://12.34.45.6:27018/awesome';
+        $options = array(
+            'connectTimeoutMS' => 50
+        );
+
+        $this->load($this->extension, array(
+            'saga' => array(
+                'repository' => 'mongodb',
+                'mongodb' => array(
+                    'connection' => array(
+                        'dsn' => $dsn,
+                        'options' => $options,
+                    ),
+                ),
+            ),
+        ));
+
+        $def = $this->container->getDefinition('broadway.saga.state.mongodb_connection');
+
+        $this->assertEquals($dsn, $def->getArgument(0));
+        $this->assertEquals($options, $def->getArgument(1));
     }
 
     /**
@@ -133,16 +161,30 @@ class BroadwayExtensionTest extends ExtensionTestCase
     /**
      * @test
      */
-    public function it_sets_the_logger_in_the_auditing_command_logger()
+    public function it_creates_an_auditing_logger_alias()
     {
         $configuration = array('command_handling' => array('logger' => 'service'));
 
         $this->load($this->extension, $configuration);
 
-        $loggingCommandBus = $this->container->getDefinition('broadway.auditing.command_logger');
-        $actualReference   = $loggingCommandBus->getArgument(0);
-        $expectedReference = new Reference('service');
-        $this->assertEquals($expectedReference, $actualReference);
+        $auditingLoggerAlias = $this->container->getAlias('broadway.auditing.logger');
+        $this->assertEquals('service', (string) $auditingLoggerAlias);
+    }
+
+    /**
+     * @test
+     */
+    public function it_can_enable_the_event_dispatching_command_bus_but_not_the_logger()
+    {
+        $configuration = array('command_handling' => array('dispatch_events' => true, 'logger' => false));
+
+        $this->load($this->extension, $configuration);
+
+        $this->assertSame(
+            'broadway.command_handling.event_dispatching_command_bus',
+            (string) $this->container->getAlias('broadway.command_handling.command_bus')
+        );
+        $this->assertFalse($this->container->hasDefinition('broadway.auditing.command_logger'));
     }
 
     private function assertDICAliasClass($aliasId, $class)
