@@ -28,9 +28,13 @@ class NamedConstructorAggregateFactory implements AggregateFactoryInterface
      */
     public function create($aggregateClass, DomainEventStreamInterface $domainEventStream, DomainMessage $snapshot = null)
     {
-        Assert::true(method_exists($aggregateClass, $this->staticConstructorMethod));
-
         $methodCall = sprintf('%s::%s', $aggregateClass, $this->staticConstructorMethod);
+
+        Assert::true(
+            method_exists($aggregateClass, $this->staticConstructorMethod),
+            sprintf('NamedConstructorAggregateFactory expected %s to exist', $methodCall)
+        );
+
         $aggregate  = call_user_func($methodCall);
 
         Assert::isInstanceOf($aggregate, $aggregateClass);

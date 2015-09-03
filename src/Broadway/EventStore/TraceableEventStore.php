@@ -79,4 +79,12 @@ class TraceableEventStore implements EventStoreInterface
     {
         $this->tracing = true;
     }
+
+    /**
+     * Clear any previously recorded events.
+     */
+    public function clearEvents()
+    {
+        $this->recorded = array();
+    }
 }

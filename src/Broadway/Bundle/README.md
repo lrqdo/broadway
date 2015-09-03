@@ -61,6 +61,18 @@ user, an ip address or some request token.
 <tag name="broadway.metadata_enricher" />
 ```
 
+### Sagas
+
+Register sagas using the `broadway.saga` service tag:
+ 
+```xml
+<service class="ReservationSaga">
+    <argument type="service" id="broadway.command_handling.command_bus" />
+    <argument type="service" id="broadway.uuid.generator" />
+    <tag name="broadway.saga" type="reservation" />
+</service>
+```
+
 ## Configuration
 
 There are some basic configuration options available at this point. The
@@ -77,7 +89,7 @@ broadway:
             table:            events
             use_binary:       false # If you want to use UUIDs to be stored as BINARY(16), required DBAL >= 2.5.0
     command_handling:
-        logger:               false
+        logger:               false # If you want to log every command handled, provide the logger's service id here (e.g. "logger")
     saga:
         repository:           ~ # One of "in_memory"; "mongodb"
     read_model:

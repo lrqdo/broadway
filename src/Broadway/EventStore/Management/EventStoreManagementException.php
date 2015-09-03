@@ -9,9 +9,13 @@
  * file that was distributed with this source code.
  */
 
-if (file_exists($file = __DIR__ . '/../vendor/autoload.php')) {
-    $loader = require $file;
-    $loader->add('Broadway', __DIR__);
-} else {
-    throw new RuntimeException('Install dependencies to run test suite.');
+namespace Broadway\EventStore\Management;
+
+use RuntimeException;
+
+/**
+ * Exceptions thrown by event store implementations.
+ */
+abstract class EventStoreManagementException extends RuntimeException
+{
 }

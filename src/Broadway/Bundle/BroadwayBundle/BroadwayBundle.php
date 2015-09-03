@@ -13,10 +13,11 @@ namespace Broadway\Bundle\BroadwayBundle;
 
 use Broadway\Bundle\BroadwayBundle\Command\SchemaEventStoreCreateCommand;
 use Broadway\Bundle\BroadwayBundle\Command\SchemaEventStoreDropCommand;
+use Broadway\Bundle\BroadwayBundle\DependencyInjection\DefineDBALEventStoreConnectionCompilerPass;
 use Broadway\Bundle\BroadwayBundle\DependencyInjection\RegisterBusSubscribersCompilerPass;
 use Broadway\Bundle\BroadwayBundle\DependencyInjection\RegisterEventListenerCompilerPass;
 use Broadway\Bundle\BroadwayBundle\DependencyInjection\RegisterMetadataEnricherSubscriberPass;
-use Broadway\Bundle\BroadwayBundle\DependencyInjection\DefineDBALEventStoreConnectionCompilerPass;
+use Broadway\Bundle\BroadwayBundle\DependencyInjection\RegisterSagaCompilerPass;
 use Symfony\Component\Console\Application;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Bundle\Bundle;
@@ -33,6 +34,12 @@ class BroadwayBundle extends Bundle
     {
         parent::build($container);
 
+        $container->addCompilerPass(
+            new RegisterSagaCompilerPass(
+                'broadway.saga.multiple_saga_manager',
+                'broadway.saga'
+            )
+        );
         $container->addCompilerPass(
             new RegisterBusSubscribersCompilerPass(
                 'broadway.command_handling.command_bus',
@@ -60,7 +67,7 @@ class BroadwayBundle extends Bundle
             )
         );
         $container->addCompilerPass(
-            new DefineDBALEventStoreConnectionCompilerPass()
+            new DefineDBALEventStoreConnectionCompilerPass($this->getContainerExtension()->getAlias())
         );
     }
 
